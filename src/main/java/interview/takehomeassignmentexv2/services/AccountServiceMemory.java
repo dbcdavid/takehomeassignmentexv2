@@ -29,6 +29,17 @@ public class AccountServiceMemory implements AccountService {
     }
 
     @Override
+    public Optional<Account> withdrawAmountById(Event event) {
+        if (!accountMap.containsKey(event.getOrigin())) {
+            return Optional.empty();
+        }
+
+        Account account = accountMap.get(event.getOrigin());
+        account.setBalance(account.getBalance().subtract(event.getAmount()));
+        return Optional.of(account);
+    }
+
+    @Override
     public Optional<BigDecimal> getBalanceById(Integer id) {
         if (!accountMap.containsKey(id)) {
             return Optional.empty();

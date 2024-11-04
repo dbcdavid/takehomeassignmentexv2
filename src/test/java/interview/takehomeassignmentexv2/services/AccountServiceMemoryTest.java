@@ -52,6 +52,23 @@ class AccountServiceMemoryTest {
         assert(response.get()).equals(BigDecimal.TEN);
     }
 
+    @Test
+    void testWithdrawAmountByIdNonExistingAccount() {
+        Event withdrawEvent = createSampleEvent(null, 123456, new BigDecimal("10"), EventType.WITHDRAW);
+        Optional<Account> response = accountServiceMemory.withdrawAmountById(withdrawEvent);
+        assertTrue(response.isEmpty());
+    }
+
+    @Test
+    void testWithdrawAmountByIdExistingAccount() {
+        Account account = createSampleAccount(123456);
+        Event withdrawEvent = createSampleEvent(null, account.getId(), new BigDecimal("10"), EventType.WITHDRAW);
+        accountServiceMemory.withdrawAmountById(withdrawEvent);
+        Optional<BigDecimal> response = accountServiceMemory.getBalanceById(account.getId());
+        assertTrue(response.isPresent());
+        assert(response.get()).equals(new BigDecimal("0"));
+    }
+
     private Account createSampleAccount(Integer id) {
         Event depositEvent = createSampleEvent(id, null, new BigDecimal("10"), EventType.DEPOSIT);
         return accountServiceMemory.depositAmountById(depositEvent);

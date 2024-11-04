@@ -10,4 +10,6 @@ public interface AccountService {
     Account depositAmountById(Event event);
 
     Optional<BigDecimal> getBalanceById(Integer id);
+
+    Optional<Account> withdrawAmountById(Event event);
 }
