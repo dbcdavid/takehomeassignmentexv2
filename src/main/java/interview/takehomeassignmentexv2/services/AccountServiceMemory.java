@@ -40,6 +40,20 @@ public class AccountServiceMemory implements AccountService {
     }
 
     @Override
+    public Optional<List<Account>> transferAmount(Event event) {
+        if (!accountMap.containsKey(event.getOrigin()) || !accountMap.containsKey(event.getDestination())) {
+            return Optional.empty();
+        }
+
+        Account savedFrom = accountMap.get(event.getOrigin());
+        Account savedTo = accountMap.get(event.getDestination());
+        savedFrom.setBalance(savedFrom.getBalance().subtract(event.getAmount()));
+        savedTo.setBalance(savedTo.getBalance().add(event.getAmount()));
+
+        return Optional.of(new ArrayList<>(Arrays.asList(savedFrom, savedTo)));
+    }
+
+    @Override
     public Optional<BigDecimal> getBalanceById(Integer id) {
         if (!accountMap.containsKey(id)) {
             return Optional.empty();
