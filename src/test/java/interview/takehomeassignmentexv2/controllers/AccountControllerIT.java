@@ -60,11 +60,7 @@ class AccountControllerIT {
 
     @Test
     void testCreateAccount() throws Exception {
-        Event event = Event.builder()
-                .type(EventType.DEPOSIT)
-                .destination(123456)
-                .amount(new BigDecimal("25"))
-                .build();
+        Event event = createSampleEvent(EventType.DEPOSIT, null, 123456, new BigDecimal("25"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,11 +71,7 @@ class AccountControllerIT {
 
     @Test
     void testDeposit() throws Exception {
-        Event event = Event.builder()
-                .type(EventType.DEPOSIT)
-                .destination(123456)
-                .amount(new BigDecimal("25"))
-                .build();
+        Event event = createSampleEvent(EventType.DEPOSIT, null, 123456, new BigDecimal("25"));
 
         createSampleAccount(123456, new BigDecimal("25"));
         mockMvc.perform(post(AccountController.EVENT_PATH)
@@ -90,6 +82,18 @@ class AccountControllerIT {
                 .andExpect(jsonPath("$.destination.balance", is(50)))
                 .andReturn();
     }
+
+    @Test
+    void testBadEvent() throws Exception {
+        Event event = createSampleEvent(null, null, null, null);
+
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isBadRequest());
+    }
+
 
     void createSampleAccount(Integer id, BigDecimal balance) {
         Event event = createSampleEvent(EventType.DEPOSIT, null, id, balance);
