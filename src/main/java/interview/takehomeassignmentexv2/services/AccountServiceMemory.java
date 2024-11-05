@@ -63,6 +63,11 @@ public class AccountServiceMemory implements AccountService {
         return Optional.of(account.getBalance());
     }
 
+    @Override
+    public void reset(){
+        accountMap.clear();
+    }
+
     private Account createAccount(Integer id){
         Account newAccount = Account.builder()
                 .id(id)

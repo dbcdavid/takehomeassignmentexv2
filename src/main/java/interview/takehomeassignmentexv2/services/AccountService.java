@@ -15,4 +15,6 @@ public interface AccountService {
     Optional<Account> withdrawAmountById(Event event);
 
     Optional<List<Account>> transferAmount(Event event);
+
+    void reset();
 }
