@@ -1,5 +1,6 @@
 package interview.takehomeassignmentexv2.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import interview.takehomeassignmentexv2.model.Event;
 import interview.takehomeassignmentexv2.model.EventType;
@@ -49,7 +50,7 @@ class AccountControllerIT {
 
     @Test
     void testGetBalanceExistingAccount() throws Exception {
-        createSampleAccount(123456, new BigDecimal("25"));
+        createSampleAccount("123456", new BigDecimal("25"));
         MvcResult result = mockMvc.perform(get(AccountController.BALANCE_PATH)
                         .queryParam("account_id", "123456"))
                 .andExpect(status().isOk())
@@ -60,7 +61,7 @@ class AccountControllerIT {
 
     @Test
     void testCreateAccount() throws Exception {
-        Event event = createSampleEvent(EventType.DEPOSIT, null, 123456, new BigDecimal("25"));
+        Event event = createSampleEvent(EventType.DEPOSIT, null, "123456", new BigDecimal("25"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,9 +72,9 @@ class AccountControllerIT {
 
     @Test
     void testDeposit() throws Exception {
-        Event event = createSampleEvent(EventType.DEPOSIT, null, 123456, new BigDecimal("25"));
+        Event event = createSampleEvent(EventType.DEPOSIT, null, "123456", new BigDecimal("25"));
 
-        createSampleAccount(123456, new BigDecimal("25"));
+        createSampleAccount("123456", new BigDecimal("25"));
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -85,21 +86,21 @@ class AccountControllerIT {
 
     @Test
     void testWithdrawExistingAccount() throws Exception {
-        Event event = createSampleEvent(EventType.WITHDRAW, 123456, null, new BigDecimal("10"));
+        Event event = createSampleEvent(EventType.WITHDRAW, "123456", null, new BigDecimal("10"));
 
-        createSampleAccount(123456, new BigDecimal("25"));
+        createSampleAccount("123456", new BigDecimal("25"));
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(event)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.origin.balance", is(15)))
                 .andReturn();
     }
 
     @Test
     void testWithdrawNonExistingAccount() throws Exception {
-        Event event = createSampleEvent(EventType.WITHDRAW, 123456, null, new BigDecimal("10"));
+        Event event = createSampleEvent(EventType.WITHDRAW, "123456", null, new BigDecimal("10"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,9 +111,9 @@ class AccountControllerIT {
 
     @Test
     void testTransferExistingAccounts() throws Exception {
-        Event event = createSampleEvent(EventType.TRANSFER, 123456, 654321, new BigDecimal("25"));
-        createSampleAccount(123456, new BigDecimal("25"));
-        createSampleAccount(654321, new BigDecimal("25"));
+        Event event = createSampleEvent(EventType.TRANSFER, "123456", "654321", new BigDecimal("25"));
+        createSampleAccount("123456", new BigDecimal("25"));
+        createSampleAccount("654321", new BigDecimal("25"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,8 +125,8 @@ class AccountControllerIT {
 
     @Test
     void testTransferNonExistingFromAccount() throws Exception {
-        Event event = createSampleEvent(EventType.TRANSFER, 123456, 654321, new BigDecimal("25"));
-        createSampleAccount(654321, new BigDecimal("25"));
+        Event event = createSampleEvent(EventType.TRANSFER, "123456", "654321", new BigDecimal("25"));
+        createSampleAccount("654321", new BigDecimal("25"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -136,8 +137,8 @@ class AccountControllerIT {
 
     @Test
     void testTransferNonExistingToAccount() throws Exception {
-        Event event = createSampleEvent(EventType.TRANSFER, 123456, 654321, new BigDecimal("25"));
-        createSampleAccount(123456, new BigDecimal("25"));
+        Event event = createSampleEvent(EventType.TRANSFER, "123456", "654321", new BigDecimal("25"));
+        createSampleAccount("123456", new BigDecimal("25"));
 
         mockMvc.perform(post(AccountController.EVENT_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,12 +191,12 @@ class AccountControllerIT {
                 .andExpect(status().isBadRequest());
     }
 
-    void createSampleAccount(Integer id, BigDecimal balance) {
+    void createSampleAccount(String id, BigDecimal balance) throws JsonProcessingException {
         Event event = createSampleEvent(EventType.DEPOSIT, null, id, balance);
         accountController.processEvent(event);
     }
 
-    Event createSampleEvent(EventType type, Integer origin, Integer destination, BigDecimal amount) {
+    Event createSampleEvent(EventType type, String origin, String destination, BigDecimal amount) {
         return Event.builder()
                 .type(type)
                 .origin(origin)

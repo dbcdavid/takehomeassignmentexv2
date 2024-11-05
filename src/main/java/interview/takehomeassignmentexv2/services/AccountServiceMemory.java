@@ -11,7 +11,7 @@ import java.util.*;
 @Service
 public class AccountServiceMemory implements AccountService {
 
-    private HashMap<Integer, Account> accountMap;
+    private HashMap<String, Account> accountMap;
 
     public AccountServiceMemory(){
         accountMap = new HashMap<>();
@@ -54,7 +54,7 @@ public class AccountServiceMemory implements AccountService {
     }
 
     @Override
-    public Optional<BigDecimal> getBalanceById(Integer id) {
+    public Optional<BigDecimal> getBalanceById(String id) {
         if (!accountMap.containsKey(id)) {
             return Optional.empty();
         }
@@ -68,7 +68,7 @@ public class AccountServiceMemory implements AccountService {
         accountMap.clear();
     }
 
-    private Account createAccount(Integer id){
+    private Account createAccount(String id){
         Account newAccount = Account.builder()
                 .id(id)
                 .balance(BigDecimal.ZERO)

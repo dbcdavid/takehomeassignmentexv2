@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class Event {
-    Integer origin;
-    Integer destination;
+    String origin;
+    String destination;
     EventType type;
     BigDecimal amount;
 }

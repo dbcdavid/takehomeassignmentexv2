@@ -1,5 +1,7 @@
 package interview.takehomeassignmentexv2.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import interview.takehomeassignmentexv2.model.Account;
 import interview.takehomeassignmentexv2.model.Event;
 import interview.takehomeassignmentexv2.model.EventType;
@@ -23,20 +25,26 @@ public class AccountController {
     public static final String RESET_PATH = "/reset";
 
     private final AccountService accountService;
+    private final ObjectMapper objectMapper;
 
-    @GetMapping(RESET_PATH)
+    @PostMapping(RESET_PATH)
     public ResponseEntity reset() {
         accountService.reset();
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @GetMapping(BALANCE_PATH)
-    public BigDecimal getBalanceById(@RequestParam Integer account_id) {
-        return accountService.getBalanceById(account_id).orElseThrow(NotFoundException::new);
+    public ResponseEntity getBalanceById(@RequestParam String account_id){
+        Optional<BigDecimal> balance = accountService.getBalanceById(account_id);
+        if (balance.isPresent()) {
+            return new ResponseEntity<>(balance.get(), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(EVENT_PATH)
-    public ResponseEntity<Map<String, Account>> processEvent(@RequestBody Event event) {
+    public ResponseEntity<String> processEvent(@RequestBody Event event) throws JsonProcessingException {
         if (EventType.DEPOSIT.equals(event.getType())) {
             return depositEvent(event);
         }
@@ -50,43 +58,43 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Map<String, Account>> depositEvent(Event event){
+    public ResponseEntity<String> depositEvent(Event event) throws JsonProcessingException {
         if (event.getDestination() != null && event.getAmount() != null) {
             Account account = accountService.depositAmountById(event);
             Map<String, Account> response = new HashMap<>();
             response.put("destination", account);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.CREATED);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Map<String, Account>> withdrawEvent(Event event){
+    public ResponseEntity<String> withdrawEvent(Event event) throws JsonProcessingException {
         if (event.getOrigin() != null && event.getAmount() != null) {
             Optional<Account> account = accountService.withdrawAmountById(event);
             if (account.isPresent()) {
                 Map<String, Account> response = new HashMap<>();
                 response.put("origin", account.get());
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.CREATED);
             }
 
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Map<String, Account>> transferEvent(Event event){
+    public ResponseEntity<String> transferEvent(Event event) throws JsonProcessingException {
         if (event.getOrigin() != null && event.getDestination() != null && event.getAmount() != null) {
             Optional<List<Account>> result = accountService.transferAmount(event);
             if (result.isPresent()) {
                 Map<String, Account> response = new HashMap<>();
                 response.put("origin", result.get().get(0));
                 response.put("destination", result.get().get(1));
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.OK);
             }
 
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface AccountService {
     Account depositAmountById(Event event);
 
-    Optional<BigDecimal> getBalanceById(Integer id);
+    Optional<BigDecimal> getBalanceById(String id);
 
     Optional<Account> withdrawAmountById(Event event);
 

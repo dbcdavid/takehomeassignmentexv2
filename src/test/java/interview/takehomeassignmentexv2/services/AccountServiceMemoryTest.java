@@ -23,7 +23,7 @@ class AccountServiceMemoryTest {
 
     @Test
     void testDepositAmountByIdNonExistingAccount() {
-        Account account = createSampleAccount(123456);
+        Account account = createSampleAccount("123456");
         Optional<BigDecimal> response = accountServiceMemory.getBalanceById(account.getId());
         assertTrue(response.isPresent());
         assert(response.get()).equals(new BigDecimal("10"));
@@ -31,7 +31,7 @@ class AccountServiceMemoryTest {
 
     @Test
     void testDepositAmountByIdExistingAccount() {
-        Account account = createSampleAccount(123456);
+        Account account = createSampleAccount("123456");
         Event depositEvent = createSampleEvent(null, account.getId(), new BigDecimal("10"), EventType.DEPOSIT);
         accountServiceMemory.depositAmountById(depositEvent);
         Optional<BigDecimal> response = accountServiceMemory.getBalanceById(account.getId());
@@ -41,13 +41,13 @@ class AccountServiceMemoryTest {
 
     @Test
     void testGetBalanceNonExistingAccount() {
-        Optional<BigDecimal> response = accountServiceMemory.getBalanceById(123456);
+        Optional<BigDecimal> response = accountServiceMemory.getBalanceById("123456");
         assertTrue(response.isEmpty());
     }
 
     @Test
     void testGetBalanceExistingAccount() {
-        Account account = createSampleAccount(123456);
+        Account account = createSampleAccount("123456");
         Optional<BigDecimal> response = accountServiceMemory.getBalanceById(account.getId());
         assertTrue(response.isPresent());
         assert(response.get()).equals(BigDecimal.TEN);
@@ -55,14 +55,14 @@ class AccountServiceMemoryTest {
 
     @Test
     void testWithdrawAmountByIdNonExistingAccount() {
-        Event withdrawEvent = createSampleEvent(123456, null, new BigDecimal("10"), EventType.WITHDRAW);
+        Event withdrawEvent = createSampleEvent("123456", null, new BigDecimal("10"), EventType.WITHDRAW);
         Optional<Account> response = accountServiceMemory.withdrawAmountById(withdrawEvent);
         assertTrue(response.isEmpty());
     }
 
     @Test
     void testWithdrawAmountByIdExistingAccount() {
-        Account account = createSampleAccount(123456);
+        Account account = createSampleAccount("123456");
         Event withdrawEvent = createSampleEvent(account.getId(), null, new BigDecimal("10"), EventType.WITHDRAW);
         accountServiceMemory.withdrawAmountById(withdrawEvent);
         Optional<BigDecimal> response = accountServiceMemory.getBalanceById(account.getId());
@@ -72,8 +72,8 @@ class AccountServiceMemoryTest {
 
     @Test
     void testTransferAmountExistingAccounts() {
-        Account origin = createSampleAccount(123456);
-        Account destination = createSampleAccount(654321);
+        Account origin = createSampleAccount("123456");
+        Account destination = createSampleAccount("654321");
         Event transferEvent = createSampleEvent(origin.getId(), destination.getId(), new BigDecimal("10"), EventType.TRANSFER);
         Optional<List<Account>> response = accountServiceMemory.transferAmount(transferEvent);
         assertTrue(response.isPresent());
@@ -89,26 +89,26 @@ class AccountServiceMemoryTest {
 
     @Test
     void testTransferAmountNonExistingOrigin() {
-        Account destination = createSampleAccount(654321);
-        Event transferEvent = createSampleEvent(123456, destination.getId(), new BigDecimal("10"), EventType.TRANSFER);
+        Account destination = createSampleAccount("654321");
+        Event transferEvent = createSampleEvent("123456", destination.getId(), new BigDecimal("10"), EventType.TRANSFER);
         Optional<List<Account>> response = accountServiceMemory.transferAmount(transferEvent);
         assertTrue(response.isEmpty());
     }
 
     @Test
     void testTransferAmountNonExistingDestination() {
-        Account origin = createSampleAccount(654321);
-        Event transferEvent = createSampleEvent(origin.getId(), 123456, new BigDecimal("10"), EventType.TRANSFER);
+        Account origin = createSampleAccount("654321");
+        Event transferEvent = createSampleEvent(origin.getId(), "123456", new BigDecimal("10"), EventType.TRANSFER);
         Optional<List<Account>> response = accountServiceMemory.transferAmount(transferEvent);
         assertTrue(response.isEmpty());
     }
 
-    private Account createSampleAccount(Integer id) {
+    private Account createSampleAccount(String id) {
         Event depositEvent = createSampleEvent(null, id, new BigDecimal("10"), EventType.DEPOSIT);
         return accountServiceMemory.depositAmountById(depositEvent);
     }
 
-    private Event createSampleEvent(Integer origin, Integer destination, BigDecimal amount, EventType type){
+    private Event createSampleEvent(String origin, String destination, BigDecimal amount, EventType type){
         return Event.builder()
                 .destination(destination)
                 .origin(origin)
