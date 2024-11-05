@@ -84,6 +84,31 @@ class AccountControllerIT {
     }
 
     @Test
+    void testWithdrawExistingAccount() throws Exception {
+        Event event = createSampleEvent(EventType.WITHDRAW, 123456, null, new BigDecimal("10"));
+
+        createSampleAccount(123456, new BigDecimal("25"));
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.origin.balance", is(15)))
+                .andReturn();
+    }
+
+    @Test
+    void testWithdrawNonExistingAccount() throws Exception {
+        Event event = createSampleEvent(EventType.WITHDRAW, 123456, null, new BigDecimal("10"));
+
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void testBadEvent() throws Exception {
         Event event = createSampleEvent(null, null, null, null);
 
@@ -93,7 +118,6 @@ class AccountControllerIT {
                         .content(objectMapper.writeValueAsString(event)))
                 .andExpect(status().isBadRequest());
     }
-
 
     void createSampleAccount(Integer id, BigDecimal balance) {
         Event event = createSampleEvent(EventType.DEPOSIT, null, id, balance);

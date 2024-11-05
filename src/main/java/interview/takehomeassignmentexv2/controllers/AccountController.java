@@ -39,6 +39,9 @@ public class AccountController {
         if (EventType.DEPOSIT.equals(event.getType())) {
             return depositEvent(event);
         }
+        else if (EventType.WITHDRAW.equals(event.getType())) {
+            return withdrawEvent(event);
+        }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -49,6 +52,21 @@ public class AccountController {
             Map<String, Account> response = new HashMap<>();
             response.put("destination", account);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<Map<String, Account>> withdrawEvent(Event event){
+        if (event.getOrigin() != null && event.getAmount() != null) {
+            Optional<Account> account = accountService.withdrawAmountById(event);
+            if (account.isPresent()) {
+                Map<String, Account> response = new HashMap<>();
+                response.put("origin", account.get());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
