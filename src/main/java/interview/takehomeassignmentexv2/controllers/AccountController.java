@@ -37,23 +37,20 @@ public class AccountController {
     @PostMapping(EVENT_PATH)
     public ResponseEntity<Map<String, Account>> processEvent(@RequestBody Event event) {
         if (EventType.DEPOSIT.equals(event.getType())) {
-            Optional<Account> account = depositEvent(event);
-            if (account.isPresent()) {
-                Map<String, Account> response = new HashMap<>();
-                response.put("destination", account.get());
-                return new ResponseEntity<>(response, HttpStatus.CREATED);
-            }
+            return depositEvent(event);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public Optional<Account> depositEvent(Event event){
+    public ResponseEntity<Map<String, Account>> depositEvent(Event event){
         if (event.getDestination() != null && event.getAmount() != null) {
             Account account = accountService.depositAmountById(event);
-            return Optional.of(account);
+            Map<String, Account> response = new HashMap<>();
+            response.put("destination", account);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
 
-        return Optional.empty();
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
