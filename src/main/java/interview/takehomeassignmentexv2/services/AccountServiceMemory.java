@@ -41,8 +41,12 @@ public class AccountServiceMemory implements AccountService {
 
     @Override
     public Optional<List<Account>> transferAmount(Event event) {
-        if (!accountMap.containsKey(event.getOrigin()) || !accountMap.containsKey(event.getDestination())) {
+        if (!accountMap.containsKey(event.getOrigin())) {
             return Optional.empty();
+        }
+
+        if (!accountMap.containsKey(event.getDestination())) {
+            createAccount(event.getDestination());
         }
 
         Account savedFrom = accountMap.get(event.getOrigin());

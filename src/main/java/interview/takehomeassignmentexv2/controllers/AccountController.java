@@ -91,7 +91,7 @@ public class AccountController {
                 Map<String, Account> response = new HashMap<>();
                 response.put("origin", result.get().get(0));
                 response.put("destination", result.get().get(1));
-                return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.OK);
+                return new ResponseEntity<>(objectMapper.writeValueAsString(response), HttpStatus.CREATED);
             }
 
             return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);

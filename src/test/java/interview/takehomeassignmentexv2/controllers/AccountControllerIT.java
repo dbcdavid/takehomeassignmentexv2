@@ -124,7 +124,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void testTransferNonExistingFromAccount() throws Exception {
+    void testTransferNonExistingOriginAccount() throws Exception {
         Event event = createSampleEvent(EventType.TRANSFER, "123456", "654321", new BigDecimal("25"));
         createSampleAccount("654321", new BigDecimal("25"));
 
@@ -136,7 +136,7 @@ class AccountControllerIT {
     }
 
     @Test
-    void testTransferNonExistingToAccount() throws Exception {
+    void testTransferNonExistingDestinationAccount() throws Exception {
         Event event = createSampleEvent(EventType.TRANSFER, "123456", "654321", new BigDecimal("25"));
         createSampleAccount("123456", new BigDecimal("25"));
 
@@ -144,7 +144,8 @@ class AccountControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(event)))
-                .andExpect(status().isNotFound());
+                .andExpect(jsonPath("$.origin.balance", is(0)))
+                .andExpect(jsonPath("$.destination.balance", is(25)));
     }
 
     @Test

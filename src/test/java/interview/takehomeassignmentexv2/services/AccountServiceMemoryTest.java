@@ -97,10 +97,19 @@ class AccountServiceMemoryTest {
 
     @Test
     void testTransferAmountNonExistingDestination() {
+        String destinationId = "123456";
         Account origin = createSampleAccount("654321");
-        Event transferEvent = createSampleEvent(origin.getId(), "123456", new BigDecimal("10"), EventType.TRANSFER);
+        Event transferEvent = createSampleEvent(origin.getId(), destinationId, new BigDecimal("10"), EventType.TRANSFER);
         Optional<List<Account>> response = accountServiceMemory.transferAmount(transferEvent);
-        assertTrue(response.isEmpty());
+        assertTrue(response.isPresent());
+
+        Optional<BigDecimal> responseFrom = accountServiceMemory.getBalanceById(origin.getId());
+        assertTrue(responseFrom.isPresent());
+        assert(responseFrom.get()).equals(new BigDecimal("0"));
+
+        Optional<BigDecimal> responseTo = accountServiceMemory.getBalanceById(destinationId);
+        assertTrue(responseTo.isPresent());
+        assert(responseTo.get()).equals(new BigDecimal("10"));
     }
 
     private Account createSampleAccount(String id) {
