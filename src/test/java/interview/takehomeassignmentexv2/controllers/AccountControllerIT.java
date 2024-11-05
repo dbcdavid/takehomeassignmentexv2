@@ -147,6 +147,39 @@ class AccountControllerIT {
     }
 
     @Test
+    void testBadDeposit() throws Exception {
+        Event event = createSampleEvent(EventType.DEPOSIT, null, null, null);
+
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testBadWithdraw() throws Exception {
+        Event event = createSampleEvent(EventType.WITHDRAW, null, null, null);
+
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testBadTransfer() throws Exception {
+        Event event = createSampleEvent(EventType.TRANSFER, null, null, null);
+
+        mockMvc.perform(post(AccountController.EVENT_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(event)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void testBadEvent() throws Exception {
         Event event = createSampleEvent(null, null, null, null);
 
