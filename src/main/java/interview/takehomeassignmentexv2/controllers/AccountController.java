@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,6 +43,9 @@ public class AccountController {
         else if (EventType.WITHDRAW.equals(event.getType())) {
             return withdrawEvent(event);
         }
+        else if (EventType.TRANSFER.equals(event.getType())) {
+            return transferEvent(event);
+        }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -63,6 +67,22 @@ public class AccountController {
             if (account.isPresent()) {
                 Map<String, Account> response = new HashMap<>();
                 response.put("origin", account.get());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<Map<String, Account>> transferEvent(Event event){
+        if (event.getOrigin() != null && event.getDestination() != null && event.getAmount() != null) {
+            Optional<List<Account>> result = accountService.transferAmount(event);
+            if (result.isPresent()) {
+                Map<String, Account> response = new HashMap<>();
+                response.put("origin", result.get().get(0));
+                response.put("destination", result.get().get(1));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
 
